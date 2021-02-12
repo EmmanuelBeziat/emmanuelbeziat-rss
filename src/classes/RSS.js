@@ -16,7 +16,7 @@ class RSS {
 				formatedItems.push({
 					item: {
 						title: post.title,
-						link: `${config.website}/${post.url}`,
+						link: `${config.website}/blog/${post.url}`,
 						description: post.description,
 						pubDate: post.date,
 						category: post.category
