@@ -27,7 +27,7 @@
   "dependencies": {
     "dayjs": "^1.10.4",
     "dotenv": "^8.2.0",
-    "jstoxml": "^2.0.3",
+    "jstoxml": "^2.0.4",
     "meta-marked": "^0.5.0"
   }
 }
