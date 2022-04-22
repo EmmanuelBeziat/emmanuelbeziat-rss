@@ -25,9 +25,9 @@
   },
   "homepage": "https://github.com/EmmanuelBeziat/emmanuelbeziat-rss#readme",
   "dependencies": {
-    "dayjs": "^1.10.5",
-    "dotenv": "^10.0.0",
-    "jstoxml": "^2.0.6",
+    "dayjs": "^1.11.1",
+    "dotenv": "^16.0.0",
+    "jstoxml": "^3.2.3",
     "meta-marked": "^0.5.0"
   }
 }
