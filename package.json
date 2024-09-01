@@ -1,6 +1,6 @@
 {
   "name": "emmanuelbeziat-rss",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "📰 RSS file creation on push hooks? Yeah!",
   "main": "src/index.js",
