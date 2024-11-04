@@ -1,17 +1,19 @@
-describe('Environment Variables', () => {
-  it('should have PORT defined', () => {
-    expect(process.env.PORT).toBeDefined()
-  })
+import { test, expect } from 'vitest'
 
-	it('should have Posts environment path defined', () => {
+describe('Environment Variables', () => {
+	test('should have PORT defined', () => {
+		expect(process.env.PORT).toBeDefined()
+	})
+
+	test('should have Posts environment path defined', () => {
 		expect(process.env.POSTS).toBeDefined()
 	})
 
-	it('should have Site environment path defined', () => {
+	test('should have Site environment path defined', () => {
 		expect(process.env.SITE).toBeDefined()
 	})
 
-	it('should have Output environment path defined', () => {
+	test('should have Output environment path defined', () => {
 		expect(process.env.OUTPUT).toBeDefined()
 	})
 })
