@@ -28,7 +28,7 @@
   "homepage": "https://github.com/EmmanuelBeziat/emmanuelbeziat-rss#readme",
   "dependencies": {
     "dayjs": "^1.11.13",
-    "dotenv": "^16.0.0",
+    "dotenv": "^16.4.7",
     "jstoxml": "^5.0.2",
     "meta-marked": "^0.5.0"
   },
@@ -37,6 +37,6 @@
     "@babel/preset-env": "^7.26.0",
     "babel-jest": "^29.7.0",
     "cross-env": "^7.0.3",
-    "vitest": "^2.1.6"
+    "vitest": "^2.1.8"
   }
 }
