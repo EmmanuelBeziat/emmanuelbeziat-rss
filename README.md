@@ -1,4 +1,6 @@
-# ![Emmanuel Béziat Logo](https://rest.emmanuelbeziat.com/public/favicons/favicon-96x96.png) emmanuelbeziat-rss :: Emmanuel Béziat
+![Emmanuel Béziat Logo](https://rest.emmanuelbeziat.com/public/favicons/favicon-96x96.png)
+
+# emmanuelbeziat-rss :: Emmanuel Béziat
 
 📰 RSS file creation on push hooks? Yeah!
 
