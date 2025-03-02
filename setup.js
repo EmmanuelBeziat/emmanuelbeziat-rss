@@ -7,7 +7,8 @@ import { dirname } from 'path'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-async function createEnvFile() {
+async function createEnvFile () {
+	const envPath = path.join(__dirname, '.env')
 	if (fs.existsSync(envPath)) {
     console.log('.env file already exists. Skipping creation.')
     return
