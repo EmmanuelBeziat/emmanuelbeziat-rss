@@ -48,7 +48,7 @@ class RSS {
 			console.log('RSS feed created successfully')
 		}
 		catch (error) {
-			throw new Error('Failed to create RSS feed')
+			throw new Error(`Failed to create RSS feed. ${error.message}`)
 		}
 	}
 
@@ -62,7 +62,7 @@ class RSS {
 			await fs.writeFile(`${path}/${this.fileName}`, content, this.encoding)
 		}
 		catch (error) {
-			throw new Error('Failed to write file')
+			throw new Error(`Failed to write file. ${error.message}`)
 		}
 	}
 }

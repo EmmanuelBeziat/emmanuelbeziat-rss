@@ -1,13 +1,20 @@
 {
   "name": "emmanuelbeziat-rss",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "description": "📰 RSS file creation on push hooks? Yeah!",
   "main": "src/index.js",
   "scripts": {
     "start": "node -r dotenv/config src/index.js",
     "setup": "npm i && node setup.js",
-    "test": "vitest --run"
+		"lint": "npx eslint src --ext .vue,.js,.jsx,.cjs,.mjs",
+    "test": "vitest --run",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,cjs,mjs}": [
+      "npx eslint"
+    ]
   },
   "repository": {
     "type": "git",
@@ -35,8 +42,12 @@
   "devDependencies": {
     "@babel/core": "^7.27.1",
     "@babel/preset-env": "^7.27.2",
+    "@eslint/js": "^9.26.0",
     "babel-jest": "^29.7.0",
     "cross-env": "^7.0.3",
+    "eslint": "^9.26.0",
+    "globals": "^16.0.0",
+    "lint-staged": "^15.5.2",
     "vitest": "^3.1.3"
   }
 }

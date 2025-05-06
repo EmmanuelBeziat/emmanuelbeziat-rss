@@ -40,7 +40,7 @@ class Post {
 			return posts.sort((a, b) => dayjs(b.date).unix() - dayjs(a.date).unix())
 		}
 		catch (error) {
-			throw new Error('Failed to load posts')
+			throw new Error(`Failed to load posts. ${error.message}`)
 		}
 	}
 }
