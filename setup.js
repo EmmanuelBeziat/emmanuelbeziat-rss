@@ -30,3 +30,5 @@ async function createEnvFile () {
   const envContent = Object.entries(responses).map(([key, value]) => `${key}=${value}`).join('\n')
   fs.writeFileSync('.env', envContent)
 }
+
+createEnvFile()
