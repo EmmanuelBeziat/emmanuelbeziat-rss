@@ -11,7 +11,7 @@ interface PostMeta {
   tags: string[]
 }
 
-interface PostData {
+export interface PostData {
   title: string
   url: string
   description: string
@@ -19,7 +19,7 @@ interface PostData {
   category: string
 }
 
-class Post {
+export class Post {
   private folder: string
   private dateFormat: string
   private encoding: BufferEncoding
@@ -31,7 +31,8 @@ class Post {
   }
 
   private slugName (fileName: string): string {
-    return fileName.replace(/\.[^/.]+$/, '').slice(11)
+    // Remove the extension and the date at the beginning of the file name
+    return fileName.replace(/\.[^/.]+$/, '').replace(/^\d{4}-\d{2}-\d{2}-/, '')
   }
 
   /**
@@ -64,4 +65,3 @@ class Post {
   }
 }
 
-export default new Post()

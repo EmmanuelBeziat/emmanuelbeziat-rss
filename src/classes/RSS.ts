@@ -1,7 +1,7 @@
 import fs from 'fs/promises'
 import path from 'path'
 import jstoxml from 'jstoxml'
-import Post from './Post.ts'
+import { type Post } from './Post.ts'
 import config from '../config.ts'
 
 interface RSSItem {
@@ -19,18 +19,20 @@ interface XMLOptions {
   indent: string
 }
 
-class RSS {
+export class RSS {
   private fileName: string
   private encoding: BufferEncoding
+  private post: Post
 
-  constructor (fileName = 'blog.xml') {
+  constructor (post: Post, fileName = 'blog.xml') {
     this.fileName = fileName
     this.encoding = 'utf-8'
+    this.post = post
   }
 
   async createFile (): Promise<void> {
     try {
-      const posts = await Post.getAllPosts()
+      const posts = await this.post.getAllPosts()
       const formattedItems: RSSItem[] = posts.map(post => ({
         item: {
           title: post.title,
@@ -86,4 +88,3 @@ class RSS {
   }
 }
 
-export default new RSS()
