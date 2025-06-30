@@ -51,7 +51,7 @@ class RSS {
           version: '2.0'
         },
         _content: {
-          channed: [
+          channel: [
             {
               title: 'Emmanuel Béziat',
               link: config.website,
