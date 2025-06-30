@@ -7,12 +7,12 @@
   "scripts": {
     "start": "node -r dotenv/config src/index.ts",
     "setup": "npm i && node setup.js",
-    "lint": "npx eslint src --ext .vue,.js,.jsx,.cjs,.mjs",
+    "lint": "npx eslint .",
     "test": "vitest --run",
     "prepare": "husky"
   },
   "lint-staged": {
-    "src/**/*.{js,jsx,cjs,mjs}": [
+    "**/*.{js,mjs,cjs,ts}": [
       "npx eslint"
     ]
   },
@@ -49,7 +49,9 @@
     "globals": "^16.2.0",
     "husky": "^9.1.7",
     "inquirer": "^12.6.3",
+    "jiti": "^2.4.2",
     "lint-staged": "^16.1.2",
+    "typescript-eslint": "^8.35.0",
     "vitest": "^3.2.4"
   }
 }
