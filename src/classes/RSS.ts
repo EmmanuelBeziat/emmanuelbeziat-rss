@@ -1,4 +1,5 @@
 import fs from 'fs/promises'
+import path from 'path'
 import jstoxml from 'jstoxml'
 import Post from './Post.ts'
 import config from '../config.ts'
@@ -71,13 +72,13 @@ class RSS {
   }
 
   /**
-   * Writes content to a file at the specified path
-   * @param path Path to the file to be created
-   * @param content Content injected in the file
+   * Writes content to a file at the specified path.
+   * @param filePath Path to the directory where the file will be created.
+   * @param content Content to be injected in the file.
    */
-  private async writeFile (path: string, content: string): Promise<void> {
+  private async writeFile (filePath: string, content: string): Promise<void> {
     try {
-      await fs.writeFile(`${path}/${this.fileName}`, content, this.encoding)
+      await fs.writeFile(path.join(filePath, this.fileName), content, this.encoding)
     }
     catch (error) {
       throw new Error(`Failed to write file. ${error instanceof Error ? error.message : String(error)}`)
