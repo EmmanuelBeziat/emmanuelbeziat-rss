@@ -35,7 +35,7 @@
   "homepage": "https://github.com/EmmanuelBeziat/emmanuelbeziat-rss#readme",
   "dependencies": {
     "dayjs": "^1.11.13",
-    "dotenv": "^17.0.1",
+    "dotenv": "^17.1.0",
     "gray-matter": "^4.0.3",
     "jstoxml": "^7.0.1"
   },
@@ -51,7 +51,7 @@
     "inquirer": "^12.7.0",
     "jiti": "^2.4.2",
     "lint-staged": "^16.1.2",
-    "typescript-eslint": "^8.35.0",
+    "typescript-eslint": "^8.36.0",
     "vitest": "^3.2.4"
   }
 }
