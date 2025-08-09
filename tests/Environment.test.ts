@@ -1,15 +1,25 @@
-import { test, expect } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { validateConfig } from '../src/utils/validate-config.ts'
 
-describe('Environment Variables', () => {
-	test('should have Posts environment path defined', () => {
-		expect(process.env.POSTS).toBeDefined()
+describe('Configuration validation', () => {
+	const originalEnv = { ...process.env }
+
+	beforeEach(() => {
+		process.env = { ...originalEnv }
+		vi.restoreAllMocks()
 	})
 
-	test('should have Site environment path defined', () => {
-		expect(process.env.SITE).toBeDefined()
+	it('throws if SITE is missing', () => {
+		delete process.env.SITE
+		expect(() => validateConfig()).toThrow('Missing required configuration values: website')
 	})
 
-	test('should have Output environment path defined', () => {
-		expect(process.env.OUTPUT).toBeDefined()
+	it('passes when SITE is provided and warns on defaults for missing POSTS/OUTPUT', () => {
+		process.env.SITE = 'https://example.com'
+		delete process.env.POSTS
+		delete process.env.OUTPUT
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+		expect(() => validateConfig()).not.toThrow()
+		expect(warn).toHaveBeenCalled()
 	})
 })

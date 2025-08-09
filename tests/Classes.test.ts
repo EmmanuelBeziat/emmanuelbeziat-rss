@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { RSS } from '../src/classes/RSS'
-import { Post } from '../src/classes/Post'
+import { RSS } from '../src/classes/RSS.ts'
+import { Post } from '../src/classes/Post.ts'
 import fs from 'fs/promises'
-import { PostData } from '../src/classes/Post'
+import { PostData } from '../src/classes/Post.ts'
+
+type ReaddirResult = Awaited<ReturnType<typeof fs.readdir>>
 
 vi.mock('fs/promises')
 
@@ -15,8 +17,7 @@ describe('Post', () => {
 	})
 
 	it('should return sorted posts', async () => {
-		// @ts-expect-error fs.readdir is overloaded, and vitest has trouble with it
-		vi.mocked(fs.readdir).mockResolvedValue(['2023-02-01-test.md', '2023-01-01-test.md'])
+		vi.mocked(fs.readdir).mockResolvedValue(['2023-02-01-test.md', '2023-01-01-test.md'] as unknown as ReaddirResult)
 		vi.mocked(fs.readFile)
 			.mockResolvedValueOnce('---\ntitle: Test Post 2\ndate: 2023-02-01\ntags: [test]\n---\nContent')
 			.mockResolvedValueOnce('---\ntitle: Test Post 1\ndate: 2023-01-01\ntags: [test]\n---\nContent')
@@ -25,6 +26,17 @@ describe('Post', () => {
 
 		expect(posts).toBeDefined()
 		expect(posts.length).toBeGreaterThan(0)
+		expect(posts[0].title).toBe('Test Post 2')
+	})
+
+	it('should respect limit option', async () => {
+		vi.mocked(fs.readdir).mockResolvedValue(['2023-02-01-test.md', '2023-01-01-test.md'] as unknown as ReaddirResult)
+		vi.mocked(fs.readFile)
+			.mockResolvedValueOnce('---\ntitle: Test Post 2\ndate: 2023-02-01\ntags: [test]\n---\nContent')
+			.mockResolvedValueOnce('---\ntitle: Test Post 1\ndate: 2023-01-01\ntags: [test]\n---\nContent')
+
+		const posts = await post.getAllPosts(1)
+		expect(posts.length).toBe(1)
 		expect(posts[0].title).toBe('Test Post 2')
 	})
 
@@ -53,6 +65,7 @@ describe('RSS', () => {
 			category: 'Test'
 		}]
 		vi.spyOn(post, 'getAllPosts').mockResolvedValue(mockPosts)
+		vi.mocked(fs.mkdir).mockResolvedValue(undefined)
 		vi.mocked(fs.writeFile).mockResolvedValue()
 
 		await rss.createFile()
@@ -61,6 +74,7 @@ describe('RSS', () => {
 
 	it('handles file write errors gracefully', async () => {
 		vi.spyOn(post, 'getAllPosts').mockResolvedValue([])
+		vi.mocked(fs.mkdir).mockResolvedValue(undefined)
 		vi.mocked(fs.writeFile).mockRejectedValue(new Error('Failed to write file'))
 		await expect(rss.createFile()).rejects.toThrow('Failed to create RSS feed. Failed to write file')
 	})
