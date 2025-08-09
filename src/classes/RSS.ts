@@ -30,42 +30,48 @@ export class RSS {
 		this.post = post
 	}
 
-	async createFile (): Promise<void> {
+	buildXml (items: RSSItem[]): string {
+		const website = (config.website ?? '').replace(/\/+$/, '')
+		const xmlOptions: XMLOptions = {
+			header: true,
+			indent: '  '
+		}
+
+		return jstoxml.toXML({
+			_name: 'rss',
+			_attrs: { version: '2.0' },
+			_content: {
+				channel: [
+					{ title: 'Emmanuel Béziat' },
+					{ link: website },
+					{ description: 'Blog' },
+					...items
+				]
+			}
+		}, xmlOptions)
+	}
+
+	async createFile (options?: { limit?: number; outputDir?: string; fileName?: string }): Promise<void> {
 		try {
-			const posts = await this.post.getAllPosts()
+			const limit = options?.limit
+			const posts = await this.post.getAllPosts(limit)
+			const website = (config.website ?? '').replace(/\/+$/, '')
 			const formattedItems: RSSItem[] = posts.map(post => ({
 				item: {
 					title: post.title,
-					link: `${config.website}/blog/${post.url}`,
+					link: `${website}/blog/${post.url}`,
 					description: post.description,
 					pubDate: post.date,
 					category: post.category
 				}
 			}))
 
-			const xmlOptions: XMLOptions = {
-				header: true,
-				indent: '  '
-			}
+			const feed = this.buildXml(formattedItems)
 
-			const feed = jstoxml.toXML({
-				_name: 'rss',
-				_attrs: {
-					version: '2.0'
-				},
-				_content: {
-					channel: [
-						{
-							title: 'Emmanuel Béziat',
-							link: config.website,
-							description: 'Example description'
-						},
-						formattedItems
-					]
-				}
-			}, xmlOptions)
+			const outputDir = options?.outputDir ?? config.output ?? './output'
+			const fileName = options?.fileName ?? this.fileName
 
-			await this.writeFile(config.output ?? './output', feed)
+			await this.writeFile(outputDir, fileName, feed)
 			console.log('RSS feed created successfully')
 		}
 		catch (error) {
@@ -74,13 +80,15 @@ export class RSS {
 	}
 
 	/**
-   * Writes content to a file at the specified path.
-   * @param filePath Path to the directory where the file will be created.
-   * @param content Content to be injected in the file.
-   */
-	private async writeFile (filePath: string, content: string): Promise<void> {
+	 * Writes content to a file at the specified path.
+	 * @param dir Path to the directory where the file will be created.
+	 * @param name File name to write.
+	 * @param content Content to be injected in the file.
+	 */
+	private async writeFile (dir: string, name: string, content: string): Promise<void> {
 		try {
-			await fs.writeFile(path.join(filePath, this.fileName), content, this.encoding)
+			await fs.mkdir(dir, { recursive: true })
+			await fs.writeFile(path.join(dir, name), content, this.encoding)
 		}
 		catch (error) {
 			throw new Error(`Failed to write file. ${error instanceof Error ? error.message : String(error)}`)

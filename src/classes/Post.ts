@@ -17,8 +17,8 @@ export class Post {
 	private dateFormat: string
 	private encoding: BufferEncoding
 
-	constructor () {
-		this.folder = config.posts ?? './posts'
+	constructor (folder?: string) {
+		this.folder = folder ?? config.posts ?? './posts'
 		this.dateFormat = 'ddd, DD MMM YYYY HH:mm:ss ZZ'
 		this.encoding = 'utf-8'
 	}
@@ -37,24 +37,53 @@ export class Post {
    * and returns their metadata and content in a structured format.
    * @returns {Promise<PostData[]>} A promise that resolves to an array of post objects.
    */
-	async getAllPosts (): Promise<PostData[]> {
+	async getAllPosts (limit?: number): Promise<PostData[]> {
 		try {
-			const files = await fs.readdir(path.resolve(this.folder), this.encoding)
-			const posts = await Promise.all(files.map(async (file) => {
+			const dirPath = path.resolve(this.folder)
+			const dirEntries = await fs.readdir(dirPath, { withFileTypes: true })
+			const maybeEntries: unknown = dirEntries as unknown
+
+			function hasFileProps (value: unknown): value is { name: string; isFile: () => boolean } {
+				return typeof value === 'object'
+					&& value !== null
+					&& 'name' in value
+					&& 'isFile' in value
+					&& typeof (value as { name: unknown }).name === 'string'
+					&& typeof (value as { isFile: unknown }).isFile === 'function'
+			}
+
+			const files = (Array.isArray(maybeEntries) ? maybeEntries : [])
+				.map(entry => {
+					if (typeof entry === 'string') return entry
+					if (hasFileProps(entry)) return entry.isFile() ? entry.name : null
+					return null
+				})
+				.filter((name): name is string => typeof name === 'string' && name.toLowerCase().endsWith('.md'))
+
+			const posts = await Promise.all(files.map(async file => {
 				const postContent = await fs.readFile(path.resolve(this.folder, file), this.encoding)
 				const { data: meta } = matter(postContent)
 
+				const tags = Array.isArray(meta.tags)
+					? meta.tags
+					: (typeof meta.tags === 'string' ? [meta.tags] : [])
+
+				const rawDate = dayjs(meta.date)
+				const formattedDate = rawDate.isValid()
+					? rawDate.format(this.dateFormat)
+					: ''
+
 				return {
-					title: meta.title,
+					title: meta.title ?? this.slugName(file),
 					url: this.slugName(file),
 					description: meta.description || '',
-					date: dayjs(meta.date).format(this.dateFormat) || '',
-					category: meta.tags.join(', ') || ''
+					date: formattedDate,
+					category: tags.join(', ')
 				}
 			}))
 
-			// Sort posts by date
-			return posts.sort((a, b) => dayjs(b.date).unix() - dayjs(a.date).unix())
+			const sorted = posts.sort((a, b) => dayjs(b.date).unix() - dayjs(a.date).unix())
+			return typeof limit === 'number' && limit > 0 ? sorted.slice(0, limit) : sorted
 		}
 		catch (error) {
 			throw new Error(`Failed to load posts. ${error instanceof Error ? error.message : String(error)}`)

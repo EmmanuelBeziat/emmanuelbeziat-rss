@@ -4,8 +4,11 @@
   "type": "module",
   "description": "📰 RSS file creation on push hooks? Yeah!",
   "main": "src/index.ts",
+  "bin": {
+    "rss-build": "src/cli.ts"
+  },
   "scripts": {
-    "start": "node -r dotenv/config src/index.ts",
+    "start": "node -r dotenv/config src/cli.ts",
     "setup": "npm i && node setup.js",
     "lint": "npx eslint .",
     "test": "vitest --run",

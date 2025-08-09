@@ -29,18 +29,30 @@ npm i
 ## .env file example
 
 ```env
-PORT=<port>
 POSTS="<folder path>"
 SITE="<url>"
 OUTPUT="<folder path>"
 ```
 ## Usage
 
-- **Build the RSS file**
+- **CLI**
   ```bash
-  npm start
+  npm start # same as: rss-build
+  rss-build --posts ./posts --site https://example.com --output ./output --file-name blog.xml --limit 20
   ```
-  Just build the RSS file. It need to run only once when a change in files content happen (triggered from a webhook)
+  Build the RSS file. Can be triggered from a webhook.
+
+- **Programmatic API**
+  ```ts
+  import { buildRss } from 'emmanuelbeziat-rss'
+
+  await buildRss({
+    postsDir: './posts',
+    outputDir: './output',
+    fileName: 'blog.xml',
+    limit: 20
+  })
+  ```
 
 ## License
 
