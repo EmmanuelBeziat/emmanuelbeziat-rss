@@ -53,8 +53,8 @@
     "husky": "^9.1.7",
     "inquirer": "^13.0.1",
     "jiti": "^2.6.1",
-    "lint-staged": "^16.2.6",
-    "typescript-eslint": "^8.46.4",
-    "vitest": "^4.0.9"
+    "lint-staged": "^16.2.7",
+    "typescript-eslint": "^8.48.0",
+    "vitest": "^4.0.14"
   }
 }
