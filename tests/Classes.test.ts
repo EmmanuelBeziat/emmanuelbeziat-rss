@@ -6,6 +6,10 @@ import { PostData } from '../src/classes/Post.ts'
 
 type ReaddirResult = Awaited<ReturnType<typeof fs.readdir>>
 
+function makeDirent (name: string): { name: string; isFile: () => boolean } {
+	return { name, isFile: () => true }
+}
+
 vi.mock('fs/promises')
 
 describe('Post', () => {
@@ -17,7 +21,7 @@ describe('Post', () => {
 	})
 
 	it('should return sorted posts', async () => {
-		vi.mocked(fs.readdir).mockResolvedValue(['2023-02-01-test.md', '2023-01-01-test.md'] as unknown as ReaddirResult)
+		vi.mocked(fs.readdir).mockResolvedValue([makeDirent('2023-02-01-test.md'), makeDirent('2023-01-01-test.md')] as unknown as ReaddirResult)
 		vi.mocked(fs.readFile)
 			.mockResolvedValueOnce('---\ntitle: Test Post 2\ndate: 2023-02-01\ntags: [test]\n---\nContent')
 			.mockResolvedValueOnce('---\ntitle: Test Post 1\ndate: 2023-01-01\ntags: [test]\n---\nContent')
@@ -30,7 +34,7 @@ describe('Post', () => {
 	})
 
 	it('should respect limit option', async () => {
-		vi.mocked(fs.readdir).mockResolvedValue(['2023-02-01-test.md', '2023-01-01-test.md'] as unknown as ReaddirResult)
+		vi.mocked(fs.readdir).mockResolvedValue([makeDirent('2023-02-01-test.md'), makeDirent('2023-01-01-test.md')] as unknown as ReaddirResult)
 		vi.mocked(fs.readFile)
 			.mockResolvedValueOnce('---\ntitle: Test Post 2\ndate: 2023-02-01\ntags: [test]\n---\nContent')
 			.mockResolvedValueOnce('---\ntitle: Test Post 1\ndate: 2023-01-01\ntags: [test]\n---\nContent')

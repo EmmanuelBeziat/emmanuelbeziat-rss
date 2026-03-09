@@ -60,24 +60,11 @@ async function main () {
 	const opts = parseArgs()
 
 	if (opts.stdout) {
-		// Build XML to stdout: use internal API pieces
 		const { Post } = await import('./classes/Post.ts')
 		const { RSS } = await import('./classes/RSS.ts')
 		const post = new Post(opts.posts)
 		const rss = new RSS(post, opts.fileName)
-
-		const posts = await post.getAllPosts(opts.limit)
-		const website = (process.env.SITE ?? '').replace(/\/+$/, '')
-		const items = posts.map(p => ({
-			item: {
-				title: p.title,
-				link: `${website}/blog/${p.url}`,
-				description: p.description,
-				pubDate: p.date,
-				category: p.category
-			}
-		}))
-		const xml = rss.buildXml(items)
+		const xml = await rss.buildXmlFromPosts(opts.limit)
 		console.log(xml)
 		return
 	}

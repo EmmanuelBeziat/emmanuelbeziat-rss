@@ -18,7 +18,6 @@ export default tseslint.config(
 		],
 		languageOptions: {
 			globals: {
-				...globals.browser,
 				...globals.node
 			}
 		},
@@ -27,7 +26,8 @@ export default tseslint.config(
 			'no-tabs': 'off',
 			'brace-style': 'off',
 			'comma-dangle': ['error', 'only-multiline'],
-			'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+			'no-unused-vars': 'off',
+			'@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
 			'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
 			'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off'
 		}

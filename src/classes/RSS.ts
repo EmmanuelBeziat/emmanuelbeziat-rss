@@ -17,6 +17,7 @@ interface RSSItem {
 interface XMLOptions {
   header: boolean
   indent: string
+  [key: string]: unknown
 }
 
 export class RSS {
@@ -42,31 +43,33 @@ export class RSS {
 			_attrs: { version: '2.0' },
 			_content: {
 				channel: [
-					{ title: 'Emmanuel Béziat' },
+					{ title: config.feedTitle ?? website },
 					{ link: website },
-					{ description: 'Blog' },
+					{ description: config.feedDescription ?? '' },
 					...items
 				]
 			}
 		}, xmlOptions)
 	}
 
+	async buildXmlFromPosts (limit?: number): Promise<string> {
+		const posts = await this.post.getAllPosts(limit)
+		const website = (config.website ?? '').replace(/\/+$/, '')
+		const items: RSSItem[] = posts.map(post => ({
+			item: {
+				title: post.title,
+				link: `${website}/blog/${post.url}`,
+				description: post.description,
+				pubDate: post.date,
+				category: post.category
+			}
+		}))
+		return this.buildXml(items)
+	}
+
 	async createFile (options?: { limit?: number; outputDir?: string; fileName?: string }): Promise<void> {
 		try {
-			const limit = options?.limit
-			const posts = await this.post.getAllPosts(limit)
-			const website = (config.website ?? '').replace(/\/+$/, '')
-			const formattedItems: RSSItem[] = posts.map(post => ({
-				item: {
-					title: post.title,
-					link: `${website}/blog/${post.url}`,
-					description: post.description,
-					pubDate: post.date,
-					category: post.category
-				}
-			}))
-
-			const feed = this.buildXml(formattedItems)
+			const feed = await this.buildXmlFromPosts(options?.limit)
 
 			const outputDir = options?.outputDir ?? config.output ?? './output'
 			const fileName = options?.fileName ?? this.fileName

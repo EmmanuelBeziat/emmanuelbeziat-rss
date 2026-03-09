@@ -12,6 +12,10 @@ export interface PostData {
   category: string
 }
 
+interface PostWithTimestamp extends PostData {
+	rawTimestamp: number
+}
+
 export class Post {
 	private folder: string
 	private dateFormat: string
@@ -41,26 +45,12 @@ export class Post {
 		try {
 			const dirPath = path.resolve(this.folder)
 			const dirEntries = await fs.readdir(dirPath, { withFileTypes: true })
-			const maybeEntries: unknown = dirEntries as unknown
 
-			function hasFileProps (value: unknown): value is { name: string; isFile: () => boolean } {
-				return typeof value === 'object'
-					&& value !== null
-					&& 'name' in value
-					&& 'isFile' in value
-					&& typeof (value as { name: unknown }).name === 'string'
-					&& typeof (value as { isFile: unknown }).isFile === 'function'
-			}
+			const files = dirEntries
+				.filter(entry => entry.isFile() && entry.name.toLowerCase().endsWith('.md'))
+				.map(entry => entry.name)
 
-			const files = (Array.isArray(maybeEntries) ? maybeEntries : [])
-				.map(entry => {
-					if (typeof entry === 'string') return entry
-					if (hasFileProps(entry)) return entry.isFile() ? entry.name : null
-					return null
-				})
-				.filter((name): name is string => typeof name === 'string' && name.toLowerCase().endsWith('.md'))
-
-			const posts = await Promise.all(files.map(async file => {
+			const posts: PostWithTimestamp[] = await Promise.all(files.map(async file => {
 				const postContent = await fs.readFile(path.resolve(this.folder, file), this.encoding)
 				const { data: meta } = matter(postContent)
 
@@ -69,20 +59,21 @@ export class Post {
 					: (typeof meta.tags === 'string' ? [meta.tags] : [])
 
 				const rawDate = dayjs(meta.date)
-				const formattedDate = rawDate.isValid()
-					? rawDate.format(this.dateFormat)
-					: ''
 
 				return {
 					title: meta.title ?? this.slugName(file),
 					url: this.slugName(file),
 					description: meta.description || '',
-					date: formattedDate,
-					category: tags.join(', ')
+					date: rawDate.isValid() ? rawDate.format(this.dateFormat) : '',
+					category: tags.join(', '),
+					rawTimestamp: rawDate.unix()
 				}
 			}))
 
-			const sorted = posts.sort((a, b) => dayjs(b.date).unix() - dayjs(a.date).unix())
+			const sorted: PostData[] = posts
+				.sort((a, b) => b.rawTimestamp - a.rawTimestamp)
+				.map(({ rawTimestamp: _, ...post }) => post)
+
 			return typeof limit === 'number' && limit > 0 ? sorted.slice(0, limit) : sorted
 		}
 		catch (error) {
@@ -90,4 +81,3 @@ export class Post {
 		}
 	}
 }
-
