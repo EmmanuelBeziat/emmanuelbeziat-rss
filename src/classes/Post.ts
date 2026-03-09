@@ -58,15 +58,15 @@ export class Post {
 					? meta.tags
 					: (typeof meta.tags === 'string' ? [meta.tags] : [])
 
-				const rawDate = dayjs(meta.date)
+				const rawDate = meta.date ? dayjs(meta.date) : null
 
 				return {
 					title: meta.title ?? this.slugName(file),
 					url: this.slugName(file),
 					description: meta.description || '',
-					date: rawDate.isValid() ? rawDate.format(this.dateFormat) : '',
+					date: rawDate?.isValid() ? rawDate.format(this.dateFormat) : '',
 					category: tags.join(', '),
-					rawTimestamp: rawDate.unix()
+					rawTimestamp: rawDate?.isValid() ? rawDate.unix() : 0
 				}
 			}))
 
