@@ -37,7 +37,7 @@
   },
   "homepage": "https://github.com/EmmanuelBeziat/emmanuelbeziat-rss#readme",
   "dependencies": {
-    "dayjs": "^1.11.19",
+    "dayjs": "^1.11.20",
     "dotenv": "^17.3.1",
     "gray-matter": "^4.0.3",
     "jstoxml": "^7.1.0"
@@ -46,15 +46,15 @@
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.0",
     "@eslint/js": "^9.0.0",
-    "babel-jest": "^30.2.0",
+    "babel-jest": "^30.3.0",
     "cross-env": "^10.1.0",
     "eslint": "^9.0.0",
     "globals": "^17.4.0",
     "husky": "^9.1.7",
     "inquirer": "^13.3.0",
     "jiti": "^2.6.1",
-    "lint-staged": "^16.3.2",
-    "typescript-eslint": "^8.56.1",
-    "vitest": "^4.0.18"
+    "lint-staged": "^16.3.3",
+    "typescript-eslint": "^8.57.0",
+    "vitest": "^4.1.0"
   }
 }
