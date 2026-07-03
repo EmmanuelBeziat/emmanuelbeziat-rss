@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { RSS } from '../src/classes/RSS.ts'
-import { Post } from '../src/classes/Post.ts'
+import { RSS } from '../src/classes/RSS'
+import { Post } from '../src/classes/Post'
 import fs from 'fs/promises'
-import { PostData } from '../src/classes/Post.ts'
+import { PostData } from '../src/classes/Post'
 import path from 'path'
 
 type ReaddirResult = Awaited<ReturnType<typeof fs.readdir>>

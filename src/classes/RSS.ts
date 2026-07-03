@@ -1,8 +1,8 @@
 import fs from 'fs/promises'
 import path from 'path'
 import jstoxml from 'jstoxml'
-import { type Post } from './Post.ts'
-import config from '../config.ts'
+import { type Post } from './Post'
+import config from '../config'
 
 interface RSSItem {
   item: {
@@ -78,7 +78,7 @@ export class RSS {
 			console.log('RSS feed created successfully')
 		}
 		catch (error) {
-			throw new Error(`Failed to create RSS feed. ${error instanceof Error ? error.message : String(error)}`)
+			throw new Error(`Failed to create RSS feed. ${error instanceof Error ? error.message : String(error)}`, { cause: error })
 		}
 	}
 
@@ -94,7 +94,7 @@ export class RSS {
 			await fs.writeFile(path.join(dir, name), content, this.encoding)
 		}
 		catch (error) {
-			throw new Error(`Failed to write file. ${error instanceof Error ? error.message : String(error)}`)
+			throw new Error(`Failed to write file. ${error instanceof Error ? error.message : String(error)}`, { cause: error })
 		}
 	}
 }

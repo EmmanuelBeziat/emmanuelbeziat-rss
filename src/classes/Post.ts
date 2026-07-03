@@ -2,7 +2,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import dayjs from 'dayjs'
 import matter from 'gray-matter'
-import config from '../config.ts'
+import config from '../config'
 
 export interface PostData {
   title: string
@@ -77,7 +77,7 @@ export class Post {
 			return typeof limit === 'number' && limit > 0 ? sorted.slice(0, limit) : sorted
 		}
 		catch (error) {
-			throw new Error(`Failed to load posts. ${error instanceof Error ? error.message : String(error)}`)
+			throw new Error(`Failed to load posts. ${error instanceof Error ? error.message : String(error)}`, { cause: error })
 		}
 	}
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { argv, exit } from 'node:process'
-import { buildRss } from './index.ts'
+import { buildRss } from './index'
 
 type CliOptions = {
 	posts?: string
@@ -60,8 +60,8 @@ async function main () {
 	const opts = parseArgs()
 
 	if (opts.stdout) {
-		const { Post } = await import('./classes/Post.ts')
-		const { RSS } = await import('./classes/RSS.ts')
+		const { Post } = await import('./classes/Post')
+		const { RSS } = await import('./classes/RSS')
 		const post = new Post(opts.posts)
 		const rss = new RSS(post, opts.fileName)
 		const xml = await rss.buildXmlFromPosts(opts.limit)
