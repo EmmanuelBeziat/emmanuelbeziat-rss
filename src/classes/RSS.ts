@@ -1,8 +1,8 @@
 import fs from 'fs/promises'
 import path from 'path'
 import jstoxml from 'jstoxml'
-import { type Post } from './Post'
-import config from '../config'
+import { type Post } from './Post.js'
+import config from '../config.js'
 
 interface RSSItem {
   item: {

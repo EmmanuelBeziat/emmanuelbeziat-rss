@@ -2,7 +2,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import dayjs from 'dayjs'
 import matter from 'gray-matter'
-import config from '../config'
+import config from '../config.js'
 
 export interface PostData {
   title: string

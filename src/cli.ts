@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { argv, exit } from 'node:process'
-import { buildRss } from './index'
+import { buildRss } from './index.js'
 
 type CliOptions = {
 	posts?: string

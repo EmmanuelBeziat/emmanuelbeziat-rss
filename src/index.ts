@@ -1,10 +1,10 @@
-import { RSS } from './classes/RSS'
-import { Post } from './classes/Post'
-import { validateConfig } from './utils/validate-config'
+import { RSS } from './classes/RSS.js'
+import { Post } from './classes/Post.js'
+import { validateConfig } from './utils/validate-config.js'
 
-export { RSS } from './classes/RSS'
-export { Post } from './classes/Post'
-export type { PostData } from './classes/Post'
+export { RSS } from './classes/RSS.js'
+export { Post } from './classes/Post.js'
+export type { PostData } from './classes/Post.js'
 
 export async function buildRss ({ limit, outputDir, fileName, postsDir }: { limit?: number; outputDir?: string; fileName?: string; postsDir?: string } = {}): Promise<void> {
 	validateConfig()
