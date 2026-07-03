@@ -8,7 +8,7 @@
     "rss-build": "src/cli.ts"
   },
   "scripts": {
-    "start": "node -r dotenv/config src/cli.ts",
+    "start": "tsx --env-file=.env src/cli.ts",
     "update": "git pull && npm-check -u",
     "setup": "npm i && node setup.js",
     "lint": "npx eslint .",
@@ -56,6 +56,7 @@
     "inquirer": "^14.0.2",
     "jiti": "^2.7.0",
     "lint-staged": "^17.0.8",
+    "tsx": "^4.23.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.62.1",
     "vitest": "^4.1.9"
