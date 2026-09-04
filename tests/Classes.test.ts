@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { RSS } from '../src/classes/RSS'
 import { Post } from '../src/classes/Post'
 import fs from 'fs/promises'
@@ -104,11 +104,30 @@ describe('Post', () => {
 		const posts = await post.getAllPosts()
 		expect(posts).toHaveLength(1)
 	})
+
+	it('formats dates in UTC so pubDate does not shift with the local timezone', async () => {
+		const originalTz = process.env.TZ
+		process.env.TZ = 'Pacific/Honolulu'
+
+		try {
+			vi.mocked(fs.readdir).mockResolvedValue([makeDirent('2023-02-01-hawaii.md')] as unknown as ReaddirResult)
+			vi.mocked(fs.readFile).mockResolvedValueOnce('---\ntitle: Hawaii\ndate: 2023-02-01\n---\n')
+
+			const posts = await post.getAllPosts()
+
+			expect(posts[0].date).toBe('Wed, 01 Feb 2023 00:00:00 +0000')
+		}
+		finally {
+			if (originalTz === undefined) delete process.env.TZ
+			else process.env.TZ = originalTz
+		}
+	})
 })
 
 describe('RSS', () => {
 	let rss: RSS
 	let post: Post
+	const originalSite = process.env.SITE
 
 	const mockPosts: PostData[] = [{
 		title: 'Test Post',
@@ -122,6 +141,12 @@ describe('RSS', () => {
 		post = new Post()
 		rss = new RSS(post)
 		vi.clearAllMocks()
+		process.env.SITE = 'https://example.com'
+	})
+
+	afterEach(() => {
+		if (originalSite === undefined) delete process.env.SITE
+		else process.env.SITE = originalSite
 	})
 
 	it('buildXmlFromPosts returns valid XML with correct structure', async () => {
@@ -135,6 +160,25 @@ describe('RSS', () => {
 		expect(xml).toContain('<channel>')
 		expect(xml).toContain('<title>Test Post</title>')
 		expect(xml).toContain('<description>A description</description>')
+	})
+
+	it('builds absolute channel and item links from the SITE config', async () => {
+		vi.spyOn(post, 'getAllPosts').mockResolvedValue(mockPosts)
+
+		const xml = await rss.buildXmlFromPosts()
+
+		expect(xml).toContain('<link>https://example.com</link>')
+		expect(xml).toContain('<link>https://example.com/blog/test-post</link>')
+	})
+
+	it('reflects a SITE value set after RSS was constructed', async () => {
+		vi.spyOn(post, 'getAllPosts').mockResolvedValue(mockPosts)
+
+		process.env.SITE = 'https://changed-later.example.com'
+		const xml = await rss.buildXmlFromPosts()
+
+		expect(xml).toContain('<link>https://changed-later.example.com</link>')
+		expect(xml).toContain('<link>https://changed-later.example.com/blog/test-post</link>')
 	})
 
 	it('buildXmlFromPosts respects limit', async () => {

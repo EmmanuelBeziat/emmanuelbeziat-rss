@@ -1,8 +1,11 @@
 import fs from 'fs/promises'
 import path from 'path'
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc.js'
 import matter from 'gray-matter'
 import config from '../config.js'
+
+dayjs.extend(utc)
 
 export interface PostData {
   title: string
@@ -58,7 +61,7 @@ export class Post {
 					? meta.tags
 					: (typeof meta.tags === 'string' ? [meta.tags] : [])
 
-				const rawDate = meta.date ? dayjs(meta.date) : null
+				const rawDate = meta.date ? dayjs.utc(meta.date) : null
 
 				return {
 					title: meta.title ?? this.slugName(file),
