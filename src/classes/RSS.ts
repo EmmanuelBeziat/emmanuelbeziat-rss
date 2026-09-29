@@ -31,8 +31,30 @@ export class RSS {
 		this.post = post
 	}
 
+	/**
+	 * Returns the configured website without trailing slashes.
+	 * Throws rather than falling back, since an empty or relative base URL produces broken feed links.
+	 */
+	private getWebsite (): string {
+		const website = config.website
+		if (!website)
+			throw new Error('Missing required configuration value: SITE')
+
+		let url: URL
+		try {
+			url = new URL(website)
+		}
+		catch (error) {
+			throw new Error(`SITE must be an absolute URL, got "${website}"`, { cause: error })
+		}
+		if (url.protocol !== 'http:' && url.protocol !== 'https:')
+			throw new Error(`SITE must use http or https, got "${website}"`)
+
+		return website.replace(/\/+$/, '')
+	}
+
 	buildXml (items: RSSItem[]): string {
-		const website = (config.website ?? '').replace(/\/+$/, '')
+		const website = this.getWebsite()
 		const xmlOptions: XMLOptions = {
 			header: true,
 			indent: '  '
@@ -53,8 +75,8 @@ export class RSS {
 	}
 
 	async buildXmlFromPosts (limit?: number): Promise<string> {
+		const website = this.getWebsite()
 		const posts = await this.post.getAllPosts(limit)
-		const website = (config.website ?? '').replace(/\/+$/, '')
 		const items: RSSItem[] = posts.map(post => ({
 			item: {
 				title: post.title,

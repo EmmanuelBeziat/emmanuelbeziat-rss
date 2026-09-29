@@ -14,24 +14,36 @@ type CliOptions = {
 function parseArgs (): CliOptions {
 	const args = argv.slice(2)
 	const opts: CliOptions = {}
+
+	// Reads the value following a flag, refusing to silently skip a flag given without one
+	const valueFor = (flag: string, i: number): string => {
+		const value = args[i + 1]
+		if (value === undefined || value.startsWith('--'))
+			throw new Error(`${flag} requires a value`)
+		return value
+	}
+
 	for (let i = 0; i < args.length; i++) {
 		const a = args[i]
-		if (a === '--posts' && args[i + 1]) {
-			opts.posts = args[++i]
+		if (a === '--posts') {
+			opts.posts = valueFor(a, i++)
 		}
-		else if (a === '--site' && args[i + 1]) {
+		else if (a === '--site') {
 			// Allow overriding SITE for this run
-			process.env.SITE = args[++i]
+			process.env.SITE = valueFor(a, i++)
 		}
-		else if (a === '--output' && args[i + 1]) {
-			opts.output = args[++i]
+		else if (a === '--output') {
+			opts.output = valueFor(a, i++)
 		}
-		else if (a === '--file-name' && args[i + 1]) {
-			opts.fileName = args[++i]
+		else if (a === '--file-name') {
+			opts.fileName = valueFor(a, i++)
 		}
-		else if (a === '--limit' && args[i + 1]) {
-			const n = Number(args[++i])
-			if (!Number.isNaN(n) && n > 0) opts.limit = n
+		else if (a === '--limit') {
+			const raw = valueFor(a, i++)
+			const n = Number(raw)
+			if (!Number.isInteger(n) || n <= 0)
+				throw new Error(`--limit must be a positive integer, got "${raw}"`)
+			opts.limit = n
 		}
 		else if (a === '--stdout') {
 			opts.stdout = true
@@ -39,6 +51,9 @@ function parseArgs (): CliOptions {
 		else if (a === '--help' || a === '-h') {
 			printHelp()
 			exit(0)
+		}
+		else {
+			throw new Error(`Unknown option: ${a} (see --help)`)
 		}
 	}
 	return opts

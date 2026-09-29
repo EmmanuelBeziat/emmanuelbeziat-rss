@@ -53,7 +53,7 @@ describe('Post', () => {
 	})
 
 	it('should respect limit option', async () => {
-		vi.mocked(fs.readdir).mockResolvedValue([makeDirent('2023-02-01-test.md'), makeDirent('2023-01-01-test.md')] as unknown as ReaddirResult)
+		vi.mocked(fs.readdir).mockResolvedValue([makeDirent('2023-02-01-test-2.md'), makeDirent('2023-01-01-test-1.md')] as unknown as ReaddirResult)
 		vi.mocked(fs.readFile)
 			.mockResolvedValueOnce('---\ntitle: Test Post 2\ndate: 2023-02-01\ntags: [test]\n---\nContent')
 			.mockResolvedValueOnce('---\ntitle: Test Post 1\ndate: 2023-01-01\ntags: [test]\n---\nContent')
@@ -82,10 +82,55 @@ describe('Post', () => {
 	it('handles posts with missing date without crashing', async () => {
 		vi.mocked(fs.readdir).mockResolvedValue([makeDirent('no-date-post.md')] as unknown as ReaddirResult)
 		vi.mocked(fs.readFile).mockResolvedValueOnce('---\ntitle: No Date\n---\n')
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
 		const posts = await post.getAllPosts()
 		expect(posts).toHaveLength(1)
 		expect(posts[0].date).toBe('')
+		expect(warn).toHaveBeenCalledWith(expect.stringContaining('no-date-post.md'))
+		warn.mockRestore()
+	})
+
+	it('throws when a date is present but invalid', async () => {
+		vi.mocked(fs.readdir).mockResolvedValue([makeDirent('bad-date.md')] as unknown as ReaddirResult)
+		vi.mocked(fs.readFile).mockResolvedValueOnce('---\ntitle: Bad\ndate: not-a-date\n---\n')
+
+		await expect(post.getAllPosts()).rejects.toThrow('bad-date.md: invalid date "not-a-date"')
+	})
+
+	it('throws when a file name produces an empty slug', async () => {
+		vi.mocked(fs.readdir).mockResolvedValue([makeDirent('2023-01-01-.md')] as unknown as ReaddirResult)
+		vi.mocked(fs.readFile).mockResolvedValueOnce('---\ntitle: Empty\ndate: 2023-01-01\n---\n')
+
+		await expect(post.getAllPosts()).rejects.toThrow('empty slug')
+	})
+
+	it('throws when two files share the same slug', async () => {
+		vi.mocked(fs.readdir).mockResolvedValue([makeDirent('2023-01-01-foo.md'), makeDirent('2024-05-05-foo.md')] as unknown as ReaddirResult)
+		vi.mocked(fs.readFile)
+			.mockResolvedValueOnce('---\ntitle: A\ndate: 2023-01-01\n---\n')
+			.mockResolvedValueOnce('---\ntitle: B\ndate: 2024-05-05\n---\n')
+
+		await expect(post.getAllPosts()).rejects.toThrow('slug "foo" already used by 2023-01-01-foo.md')
+	})
+
+	it('throws when title is not a string', async () => {
+		vi.mocked(fs.readdir).mockResolvedValue([makeDirent('2023-01-01-num.md')] as unknown as ReaddirResult)
+		vi.mocked(fs.readFile).mockResolvedValueOnce('---\ntitle: 2024\ndate: 2023-01-01\n---\n')
+
+		await expect(post.getAllPosts()).rejects.toThrow('"title" must be a string, got number')
+	})
+
+	it('throws when a tag is not a string', async () => {
+		vi.mocked(fs.readdir).mockResolvedValue([makeDirent('2023-01-01-tags.md')] as unknown as ReaddirResult)
+		vi.mocked(fs.readFile).mockResolvedValueOnce('---\ntitle: Tags\ndate: 2023-01-01\ntags: [{ a: 1 }]\n---\n')
+
+		await expect(post.getAllPosts()).rejects.toThrow('every tag must be a string')
+	})
+
+	it.each([0, -1, 2.5, Number.NaN])('rejects invalid limit %s', async limit => {
+		await expect(post.getAllPosts(limit)).rejects.toThrow('limit must be a positive integer')
+		expect(fs.readdir).not.toHaveBeenCalled()
 	})
 
 	it('throws an error when reading directory fails', async () => {
@@ -179,6 +224,20 @@ describe('RSS', () => {
 
 		expect(xml).toContain('<link>https://changed-later.example.com</link>')
 		expect(xml).toContain('<link>https://changed-later.example.com/blog/test-post</link>')
+	})
+
+	it('throws instead of emitting relative links when SITE is missing', async () => {
+		vi.spyOn(post, 'getAllPosts').mockResolvedValue(mockPosts)
+		delete process.env.SITE
+
+		await expect(rss.buildXmlFromPosts()).rejects.toThrow('Missing required configuration value: SITE')
+	})
+
+	it.each(['example.com', 'ftp://example.com'])('throws when SITE is not an absolute http(s) URL: %s', async site => {
+		vi.spyOn(post, 'getAllPosts').mockResolvedValue(mockPosts)
+		process.env.SITE = site
+
+		await expect(rss.buildXmlFromPosts()).rejects.toThrow('SITE must')
 	})
 
 	it('buildXmlFromPosts respects limit', async () => {

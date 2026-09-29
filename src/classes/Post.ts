@@ -40,11 +40,51 @@ export class Post {
 	}
 
 	/**
+	 * Returns a frontmatter field that must be a string when present.
+	 * Throws on other types (e.g. an unquoted YAML number) instead of passing them through untyped.
+	 */
+	private optionalString (file: string, field: string, value: unknown): string | undefined {
+		if (value === undefined || value === null) return undefined
+		if (typeof value !== 'string')
+			throw new Error(`${file}: "${field}" must be a string, got ${typeof value}`)
+		return value
+	}
+
+	/**
+	 * Normalizes the `tags` frontmatter field to a list of strings.
+	 */
+	private tagList (file: string, value: unknown): string[] {
+		if (value === undefined || value === null) return []
+		const tags: unknown[] = Array.isArray(value) ? value : [value]
+		for (const tag of tags) {
+			if (typeof tag !== 'string')
+				throw new Error(`${file}: every tag must be a string, got ${JSON.stringify(tag)}`)
+		}
+		return tags as string[]
+	}
+
+	/**
+	 * Throws if two files map to the same slug, since they would share one feed URL.
+	 */
+	private assertUniqueSlugs (posts: PostData[], files: string[]): void {
+		const seen = new Map<string, string>()
+		posts.forEach((post, index) => {
+			const previous = seen.get(post.url)
+			if (previous)
+				throw new Error(`${files[index]}: slug "${post.url}" already used by ${previous}`)
+			seen.set(post.url, files[index])
+		})
+	}
+
+	/**
    * Asynchronously reads all post files from the configured folder, parses them,
    * and returns their metadata and content in a structured format.
    * @returns {Promise<PostData[]>} A promise that resolves to an array of post objects.
    */
 	async getAllPosts (limit?: number): Promise<PostData[]> {
+		if (limit !== undefined && !(Number.isInteger(limit) && limit > 0))
+			throw new Error(`limit must be a positive integer, got ${limit}`)
+
 		try {
 			const dirPath = path.resolve(this.folder)
 			const dirEntries = await fs.readdir(dirPath, { withFileTypes: true })
@@ -57,27 +97,41 @@ export class Post {
 				const postContent = await fs.readFile(path.resolve(this.folder, file), this.encoding)
 				const { data: meta } = matter(postContent)
 
-				const tags = Array.isArray(meta.tags)
-					? meta.tags
-					: (typeof meta.tags === 'string' ? [meta.tags] : [])
+				const slug = this.slugName(file)
+				if (!slug)
+					throw new Error(`${file}: file name produces an empty slug`)
 
-				const rawDate = meta.date ? dayjs.utc(meta.date) : null
+				const title = this.optionalString(file, 'title', meta.title) ?? slug
+				const description = this.optionalString(file, 'description', meta.description) ?? ''
+				const tags = this.tagList(file, meta.tags)
+
+				let rawDate: dayjs.Dayjs | null = null
+				if (meta.date === undefined || meta.date === null) {
+					console.warn(`${file}: no date in frontmatter, pubDate will be empty`)
+				}
+				else {
+					rawDate = dayjs.utc(meta.date)
+					if (!rawDate.isValid())
+						throw new Error(`${file}: invalid date "${String(meta.date)}"`)
+				}
 
 				return {
-					title: meta.title ?? this.slugName(file),
-					url: this.slugName(file),
-					description: meta.description || '',
-					date: rawDate?.isValid() ? rawDate.format(this.dateFormat) : '',
+					title,
+					url: slug,
+					description,
+					date: rawDate ? rawDate.format(this.dateFormat) : '',
 					category: tags.join(', '),
-					rawTimestamp: rawDate?.isValid() ? rawDate.unix() : 0
+					rawTimestamp: rawDate ? rawDate.unix() : 0
 				}
 			}))
+
+			this.assertUniqueSlugs(posts, files)
 
 			const sorted: PostData[] = posts
 				.sort((a, b) => b.rawTimestamp - a.rawTimestamp)
 				.map(({ rawTimestamp: _, ...post }) => post)
 
-			return typeof limit === 'number' && limit > 0 ? sorted.slice(0, limit) : sorted
+			return limit === undefined ? sorted : sorted.slice(0, limit)
 		}
 		catch (error) {
 			throw new Error(`Failed to load posts. ${error instanceof Error ? error.message : String(error)}`, { cause: error })
