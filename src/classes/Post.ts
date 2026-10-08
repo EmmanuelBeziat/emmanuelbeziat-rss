@@ -8,11 +8,11 @@ import config from '../config.js'
 dayjs.extend(utc)
 
 export interface PostData {
-  title: string
-  url: string
-  description: string
-  date: string
-  category: string
+	title: string
+	url: string
+	description: string
+	date: string
+	category: string
 }
 
 interface PostWithTimestamp extends PostData {
@@ -31,10 +31,10 @@ export class Post {
 	}
 
 	/**
-   * Generates a slug from a file name by removing the extension and the date prefix.
-   * @param fileName The original file name (e.g., '2023-01-01-my-post.md').
-   * @returns {string} The generated slug (e.g., 'my-post').
-   */
+	 * Generates a slug from a file name by removing the extension and the date prefix.
+	 * @param fileName The original file name (e.g., '2023-01-01-my-post.md').
+	 * @returns {string} The generated slug (e.g., 'my-post').
+	 */
 	private slugName (fileName: string): string {
 		return fileName.replace(/\.[^/.]+$/, '').replace(/^\d{4}-\d{2}-\d{2}-/, '')
 	}
@@ -77,10 +77,10 @@ export class Post {
 	}
 
 	/**
-   * Asynchronously reads all post files from the configured folder, parses them,
-   * and returns their metadata and content in a structured format.
-   * @returns {Promise<PostData[]>} A promise that resolves to an array of post objects.
-   */
+	 * Asynchronously reads all post files from the configured folder, parses them,
+	 * and returns their metadata and content in a structured format.
+	 * @returns {Promise<PostData[]>} A promise that resolves to an array of post objects.
+	 */
 	async getAllPosts (limit?: number): Promise<PostData[]> {
 		if (limit !== undefined && !(Number.isInteger(limit) && limit > 0))
 			throw new Error(`limit must be a positive integer, got ${limit}`)

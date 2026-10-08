@@ -24,7 +24,10 @@ export default tseslint.config(
 		rules: {
 			indent: ['error', 'tab', { SwitchCase: 1 }],
 			'no-tabs': 'off',
-			'brace-style': 'off',
+			'linebreak-style': ['error', 'unix'],
+			quotes: ['error', 'single', { avoidEscape: true }],
+			semi: ['error', 'never'],
+			'brace-style': ['error', 'stroustrup'],
 			'comma-dangle': ['error', 'only-multiline'],
 			'no-unused-vars': 'off',
 			'@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
